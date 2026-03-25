@@ -31,11 +31,26 @@ dsolve({ode, ic}, y(x));
 
 
 
+.........
 
 plot(arctan((sin(x)+cos(x))/sqrt(2)), x = -2*Pi .. 2*Pi);
 
 
 
-
 with(plots):
 polarplot(arctan((sin(theta)+cos(theta))/sqrt(2)), theta = 0 .. 2*Pi);
+
+
+
+
+plot([(3*t^2+1)/(3*t^3), sin(t^3/3 + t), t = -3 .. 3], scaling = constrained);
+
+
+x := t -> (3*t^2+1)/(3*t^3);
+y := t -> sin(t^3/3 + t);
+r := t -> sqrt(x(t)^2 + y(t)^2);
+theta := t -> arctan(y(t), x(t));
+polarplot([r(t), theta(t), t = -3 .. 3], scaling = constrained);
+
+
+
