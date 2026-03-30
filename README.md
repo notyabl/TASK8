@@ -8,7 +8,8 @@
 using namespace std;
 
 // Решение СЛАУ методом Гаусса (для малых систем)
-vector<double> solveLinearSystem(vector<vector<double>> A, vector<double> b) {
+// Решение СЛАУ методом Гаусса (для малых систем) – возвращает false, если система вырождена
+bool solveLinearSystem(vector<vector<double>> A, vector<double> b, vector<double>& x) {
     int n = A.size();
     // Прямой ход
     for (int i = 0; i < n; ++i) {
@@ -21,7 +22,8 @@ vector<double> solveLinearSystem(vector<vector<double>> A, vector<double> b) {
         swap(b[i], b[maxRow]);
 
         double pivot = A[i][i];
-        if (fabs(pivot) < 1e-12) continue;
+        if (fabs(pivot) < 1e-12) return false;   // вырожденность
+
         for (int j = i; j < n; ++j) A[i][j] /= pivot;
         b[i] /= pivot;
 
@@ -33,15 +35,16 @@ vector<double> solveLinearSystem(vector<vector<double>> A, vector<double> b) {
         }
     }
     // Обратный ход
-    vector<double> x(n);
+    x.assign(n, 0.0);
     for (int i = n - 1; i >= 0; --i) {
         x[i] = b[i];
         for (int j = i + 1; j < n; ++j)
             x[i] -= A[i][j] * x[j];
     }
-    return x;
+    return true;
 }
 
+// Локальная аппроксимация полиномом степени deg в окне
 // Локальная аппроксимация полиномом степени deg в окне
 double localFit(double x, const vector<double>& xw, const vector<double>& yw, int deg) {
     int m = xw.size();
@@ -64,7 +67,14 @@ double localFit(double x, const vector<double>& xw, const vector<double>& yw, in
         }
     }
 
-    vector<double> coeff = solveLinearSystem(A, B);
+    vector<double> coeff;
+    if (!solveLinearSystem(A, B, coeff)) {
+        // Если система вырождена, вернуть среднее арифметическое yw
+        double sum = 0.0;
+        for (double v : yw) sum += v;
+        return sum / m;
+    }
+
     double res = 0.0, xpow = 1.0;
     for (int p = 0; p < ncoeff; ++p) {
         res += coeff[p] * xpow;
