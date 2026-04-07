@@ -7,8 +7,8 @@
 
 using namespace std;
 
-// Решение СЛАУ методом Гаусса (для малых систем)
-// Решение СЛАУ методом Гаусса (для малых систем) – возвращает false, если система вырождена
+// Решение СЛАУ методом Гаусса (для малых систем) с выбором гл. элемента по столбцу
+// Решение СЛАУ методом Гаусса (для малых систем) – возвращает false, если система вырождена, и ture тогда система решена успешно.
 bool solveLinearSystem(vector<vector<double>> A, vector<double> b, vector<double>& x) {
     int n = A.size();
     // Прямой ход
@@ -34,7 +34,7 @@ bool solveLinearSystem(vector<vector<double>> A, vector<double> b, vector<double
             b[k] -= factor * b[i];
         }
     }
-    // Обратный ход
+    // Обратный ход: начиная с последнего уравнения, вычисляются неизвестные.
     x.assign(n, 0.0);
     for (int i = n - 1; i >= 0; --i) {
         x[i] = b[i];
@@ -43,9 +43,8 @@ bool solveLinearSystem(vector<vector<double>> A, vector<double> b, vector<double
     }
     return true;
 }
-
-// Локальная аппроксимация полиномом степени deg в окне
-// Локальная аппроксимация полиномом степени deg в окне
+// построить аппроксимирующий полином степени deg по точкам (xw[i], yw[i]) 
+// методом наименьших квадратов и вычислить его значение в точке x.
 double localFit(double x, const vector<double>& xw, const vector<double>& yw, int deg) {
     int m = xw.size();
     if (m <= deg) deg = m - 1;
@@ -83,7 +82,8 @@ double localFit(double x, const vector<double>& xw, const vector<double>& yw, in
     return res;
 }
 
-// Сглаживание скользящим окном
+// основная функция сглаживания –
+// для каждой точки исходных данных строит скользящее окно и вычисляет сглаженное значение.
 vector<double> smooth(const vector<double>& x, const vector<double>& y, int radius, int deg) {
     int n = x.size();
     vector<double> ys(n);
